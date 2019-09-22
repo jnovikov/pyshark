@@ -1,3 +1,5 @@
+import sys
+
 try:
     import mock
 except ModuleNotFoundError:
@@ -30,8 +32,12 @@ def test_get_dumpcap_interface_parameter(capture, monitoring, interfaces):
 
 
 def test_check_capture_filter_has_quotes(capture):
+    sys = mock.MagicMock()
+    sys.configure_mock(platform='win32')
     filter_string = "tcp port 80"
-    quoted_filter = '"%s"' % filter_string
     capture.bpf_filter = filter_string
-    params = capture._get_dumpcap_parameters()
-    assert quoted_filter in params
+    assert filter_string in capture._get_dumpcap_parameters()
+    sys.configure_mock(platform='linux2')
+    capture.bpf_filter = filter_string
+    quoted_filter = '"%s"' % filter_string
+    assert quoted_filter in capture._get_dumpcap_parameters()
